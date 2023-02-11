@@ -1,9 +1,10 @@
 package Bellman;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class BellmanFord
 {
-	public static int[] bellmanFord(Graphe g, int[][] tabPoids, Sommet sommet)
+	public static int[] bellmanFord(Graphe g, int[][] tabPoids, String sommet)
 	{
 		int[] dist = new int[g.getSommets().size()];
 
@@ -27,10 +28,11 @@ public class BellmanFord
 		return dist;
 	}
 
-	public static void afficherDistances(int[] dist)
+	public static void afficherDistances(Graphe g, int[] dist)
 	{
+		String[] tabSommets = g.getSommetsTab();
 		for (int i = 0; i < dist.length; i++)
-			System.out.println("Distance de la source vers le sommet " + i + " : " + dist[i]);
+			System.out.println("Distance de la source vers le sommet " + tabSommets[i] + " : " + dist[i]);
 	}
 
 	public static void afficherGraphe(Graphe g)
@@ -40,89 +42,70 @@ public class BellmanFord
 			System.out.println(arete.getDepart() + " -> " + arete.getDesti());
 	}
 	
-	public static void main(String[] args) {
-		Graphe graphe = new Graphe();
-		Sommet a = new Sommet("A");
-		Sommet b = new Sommet("B");
-		Sommet c = new Sommet("C");
-		Sommet d = new Sommet("D");
-		Sommet e = new Sommet("E");
-		Sommet f = new Sommet("F");
-		Sommet g = new Sommet("G");
-		graphe.ajouterSommet(a);
-		graphe.ajouterSommet(b);
-		graphe.ajouterSommet(c);
-		graphe.ajouterSommet(d);
-		graphe.ajouterSommet(e);
-		graphe.ajouterSommet(f);
-		graphe.ajouterSommet(g);
-		graphe.ajouterArete(new Arete(a, b));
-		graphe.ajouterArete(new Arete(a, c));
-		graphe.ajouterArete(new Arete(b, d));
-		graphe.ajouterArete(new Arete(c, d));
-		graphe.ajouterArete(new Arete(d, e));
-		graphe.ajouterArete(new Arete(e, f));
-		graphe.ajouterArete(new Arete(e, g));
-		graphe.ajouterArete(new Arete(f, g));
-		int[][] tabPoids = new int[graphe.getSommets().size()][graphe.getSommets().size()];
-		tabPoids[graphe.getSommets().indexOf(a)][graphe.getSommets().indexOf(b)] = 2;
-		tabPoids[graphe.getSommets().indexOf(a)][graphe.getSommets().indexOf(c)] = 3;
-		tabPoids[graphe.getSommets().indexOf(b)][graphe.getSommets().indexOf(d)] = 1;
-		tabPoids[graphe.getSommets().indexOf(c)][graphe.getSommets().indexOf(d)] = 2;
-		tabPoids[graphe.getSommets().indexOf(d)][graphe.getSommets().indexOf(e)] = 3;
-		tabPoids[graphe.getSommets().indexOf(e)][graphe.getSommets().indexOf(f)] = 4;
-		tabPoids[graphe.getSommets().indexOf(e)][graphe.getSommets().indexOf(g)] = 5;
-		tabPoids[graphe.getSommets().indexOf(f)][graphe.getSommets().indexOf(g)] = 1;
+	public static void main(String[] args) 
+	{
+		String[] sommets = {"a", "b", "c", "d", "e", "f", "g"};
+		String[][] aretes = {	{"a", "b"}, {"a", "c"}, 
+								{"b", "d"}, {"c", "d"}, 
+								{"d", "e"}, {"e", "f"}, 
+								{"e", "g"}, {"f", "g"}};
+		Graphe graphe = new Graphe(sommets, aretes);
+		int[][] tabPoids = {	{0, 1, 2, 0, 0, 0, 0},
+								{0, 0, 0, 1, 0, 0, 0},
+								{0, 0, 0, 1, 0, 0, 0},
+								{0, 0, 0, 0, 1, 0, 0},
+								{0, 0, 0, 0, 0, 1, 1},
+								{0, 0, 0, 0, 0, 0, 1},
+								{0, 0, 0, 0, 0, 0, 0}};
 		afficherGraphe(graphe);
-		int[] dist = bellmanFord(graphe, tabPoids, b);
-		afficherDistances(dist);
+		int[] dist = bellmanFord(graphe, tabPoids, "a");
+		afficherDistances(graphe, dist);
 	}
 }
 
 class Graphe
 {
-	private ArrayList<Sommet> sommets;
+	private ArrayList<String> sommets;
 	private ArrayList<Arete> aretes;
 
 	public Graphe()
 	{
-		sommets = new ArrayList<Sommet>();
+		sommets = new ArrayList<String>();
 		aretes = new ArrayList<Arete>();
 	}
 
-	public void ajouterSommet(Sommet sommet) {sommets.add(sommet);}
-	public void ajouterArete(Arete arete) {aretes.add(arete);}
-	
-	public ArrayList<Sommet> getSommets() {return sommets;}
-	public ArrayList<Arete> getAretes()	{return aretes;}
-}
-
-class Sommet
-{
-	private String id;
-	public Sommet(String id)
+	public Graphe(String[] sommets, String[][] aretes)
 	{
-		this.id = id;
+		this();
+		this.sommets = new ArrayList<String>(Arrays.asList(sommets));	
+		for (String[] arete : aretes)
+		{
+			this.aretes.add(new Arete(arete[0], arete[1]));
+		}
 	}
 
-	public String getId() {return id;}
+	public void ajouterSommet(String sommet) {sommets.add(sommet);}
+	public void ajouterArete(Arete arete) {aretes.add(arete);}
 
-	public String toString() {return id;}
+	public String[] getSommetsTab() {return sommets.toArray(new String[sommets.size()]);}
+	
+	public ArrayList<String> getSommets() {return sommets;}
+	public ArrayList<Arete> getAretes()	{return aretes;}
 }
 
 class Arete
 {
-	private Sommet depart;
-	private Sommet desti;
+	private String depart;
+	private String desti;
 
-	public Arete(Sommet depart, Sommet desti)
+	public Arete(String depart, String desti)
 	{
 		this.depart = depart;
 		this.desti = desti;
 	}
 
-	public Sommet getDepart() {return depart;}
-	public Sommet getDesti() {return desti;}
+	public String getDepart() {return depart;}
+	public String getDesti() {return desti;}
 
 	public String toString() {return depart + " -> " + desti;}
 }
